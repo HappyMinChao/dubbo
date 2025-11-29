@@ -42,6 +42,7 @@ public class Application {
         ConfigCenterConfig configCenterConfig = new ConfigCenterConfig();
         configCenterConfig.setAddress(ZOOKEEPER_URL);
 
+        // 调用静态方法， 构建单实例dubbo启动类。
         DubboBootstrap bootstrap = DubboBootstrap.getInstance();
         bootstrap
                 .application(new ApplicationConfig("dubbo-demo-api-provider"))

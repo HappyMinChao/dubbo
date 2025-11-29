@@ -35,6 +35,7 @@ import java.util.Set;
 import java.util.concurrent.locks.Lock;
 
 /**
+ * 服务模块模型
  * Model of a service module
  */
 public class ModuleModel extends ScopeModel {

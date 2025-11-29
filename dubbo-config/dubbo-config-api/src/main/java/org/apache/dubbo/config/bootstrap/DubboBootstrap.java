@@ -99,8 +99,14 @@ public final class DubboBootstrap {
 
     private final ApplicationModel applicationModel;
 
+    /**
+     * 配置管理： 应用配置、 注册中心配置、 配置中心、 协议配置、 元数据中心、 监控中心配置、 配置中心配置、 模块配置、 服务提供者配置、 服务消费者配置、 服务引用配置、 服务注册中心配置
+     */
     private final ConfigManager configManager;
 
+    /**
+     * 启动dubbo接口，提供了dubbo服务的启动、 初始化、 服务暴漏、 元数据注册、销毁等接口。
+     */
     private final ApplicationDeployer applicationDeployer;
 
     /**

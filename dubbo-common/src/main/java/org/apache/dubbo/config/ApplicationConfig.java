@@ -86,218 +86,260 @@ public class ApplicationConfig extends AbstractConfig {
     private static final ErrorTypeAwareLogger LOGGER = LoggerFactory.getErrorTypeAwareLogger(ApplicationConfig.class);
 
     /**
+     * 应用名称
      * The Application name.
      */
     private String name;
 
     /**
+     * 应用版本
      * The application version.
      */
     private String version;
 
     /**
+     * 应用负责人
      * The application owner.
      */
     private String owner;
 
     /**
+     * 应用所属组织（业务单元）
      * The application's organization (BU).
      */
     private String organization;
 
     /**
+     * 应用架构层级
      * Architecture layer.
      */
     private String architecture;
 
     /**
+     * 应用运行环境，例如：开发(dev)、测试(test)、生产(production)
      * Environment, e.g., dev, test, or production.
      */
     private String environment;
 
     /**
+     * Java编译器类型
      * Java compiler.
      */
     private String compiler;
 
     /**
+     * 日志实现类型
      * The type of log access.
      */
     private String logger;
 
     /**
+     * 注册中心配置列表
      * Registry centers.
      */
     private List<RegistryConfig> registries;
 
     /**
+     * 要注册服务的注册中心ID列表，多个ID之间用逗号分隔
      * The comma-separated list of registry IDs to which the service will be registered.
      */
     private String registryIds;
 
     /**
+     * 监控中心配置
      * Monitor center.
      */
     private MonitorConfig monitor;
 
     /**
+     * 线程转储保存目录
      * Directory for saving thread dump.
      */
     private String dumpDirectory;
 
     /**
+     * 是否启用线程转储功能
      * Whether to enable saving thread dump or not.
      */
     private Boolean dumpEnable;
 
     /**
+     * 是否启用服务质量(QoS)功能
      * Whether to enable Quality of Service (QoS) or not.
      */
     private Boolean qosEnable;
 
     /**
+     * QoS是否必须成功启动，在检查qosEnable之后才会生效
      * Whether QoS should start successfully or not, will check qosEnable first.
      */
     private Boolean qosCheck;
 
     /**
+     * QoS监听主机地址
      * The QoS host to listen.
      */
     private String qosHost;
 
     /**
+     * QoS监听端口
      * The QoS port to listen.
      */
     private Integer qosPort;
 
     /**
+     * 是否接受外部IP连接请求
      * Should we accept foreign IP or not?
      */
     private Boolean qosAcceptForeignIp;
 
     /**
+     * 当禁用外部IP访问时，支持设置白名单IP列表
      * When we disable accepting foreign IP, support specifying foreign IPs in the whitelist.
      */
     private String qosAcceptForeignIpWhitelist;
 
     /**
+     * 匿名访问权限级别，默认为NONE，表示不允许访问任何命令
      * The anonymous (any foreign IP) access permission level, default is NONE, which means no access to any command.
      */
     private String qosAnonymousAccessPermissionLevel;
 
     /**
+     * 允许匿名访问的命令列表，默认为空，表示不允许访问任何命令
      * The anonymous (any foreign IP) allowed commands, default is empty, which means no access to any command.
      */
     private String qosAnonymousAllowCommands;
 
     /**
+     * 自定义参数集合
      * Customized parameters.
      */
     private Map<String, String> parameters;
 
     /**
+     * 应用关闭等待时间配置
      * Config the shutdown wait.
      */
     private String shutwait;
 
     /**
+     * 主机名
      * Hostname.
      */
     private String hostname;
 
     /**
+     * 元数据类型，本地(local)或远程(remote)。如果选择远程，则需要进一步指定元数据中心
      * Metadata type, local or remote. If 'remote' is chosen, you need to specify a metadata center further.
      */
     private String metadataType;
 
     /**
+     * 控制是否将实例注册到注册中心，仅当实例是纯消费者时设为false
      * Used to control whether to register the instance with the registry or not. Set to 'false' only when the instance is a pure consumer.
      */
     private Boolean registerConsumer;
 
     /**
+     * 存储库地址
      * Repository.
      */
     private String repository;
 
     /**
+     * 是否启用注册中心本地文件缓存
      * Whether to enable file caching.
      */
     private Boolean enableFileCache;
 
     /**
+     * 应用首选协议名称，方便在难以确定首选协议的地方使用
      * The preferred protocol (name) of this application, convenient for places where it's hard to determine the preferred protocol.
      */
     private String protocol;
 
     /**
+     * 对等节点间传输元数据使用的协议
      * The protocol used for peer-to-peer metadata transmission.
      */
     private String metadataServiceProtocol;
 
     /**
+     * 元数据服务端口，用于服务发现
      * Metadata Service, used in Service Discovery.
      */
     private Integer metadataServicePort;
 
     /**
+     * 服务名称映射重试间隔
      * The retry interval of service name mapping.
      */
     private Integer mappingRetryInterval;
 
     /**
+     * 设置QoS探针扩展
      * Used to set extensions of the probe in QoS.
      */
     private String livenessProbe;
 
     /**
+     * 检查应用就绪状态的探针
      * The probe for checking the readiness of the application.
      */
     private String readinessProbe;
 
     /**
+     * 检查应用启动状态的探针
      * The probe for checking the startup of the application.
      */
     private String startupProbe;
 
     /**
+     * 注册模式
      * Register mode.
      */
     private String registerMode;
 
     /**
+     * 是否启用空对象保护机制
      * Whether to enable protection against empty objects.
      */
     private Boolean enableEmptyProtection;
 
     /**
+     * 类序列化检查状态
      * The status of class serialization checking.
      */
     private String serializeCheckStatus;
 
     /**
+     * 是否自动信任序列化的类
      * Whether to automatically trust serialized classes.
      */
     private Boolean autoTrustSerializeClass;
 
     /**
+     * 序列化类的信任等级
      * The trust level for serialized classes.
      */
     private Integer trustSerializeClassLevel;
 
     /**
+     * 是否检查可序列化性
      * Whether to check serializable.
      */
     private Boolean checkSerializable;
 
     /**
+     * 线程池管理模式："default" 或 "isolation"
      * Thread pool management mode: 'default' or 'isolation'.
      */
     private String executorManagementMode;
 
     /**
-     * Only use the new version of metadataService (MetadataServiceV2).
-     * <br> MetadataServiceV2 have better compatibility with other language's dubbo implement (dubbo-go).
+     * 是否仅使用新版元数据服务(MetadataServiceV2)
+     * <br> MetadataServiceV2与其他语言的Dubbo实现（如dubbo-go）有更好的兼容性
      * <br> If set to false (default):
      * <br>  1. If your services are using triple protocol and {@link #metadataServiceProtocol} is not set
      * <br>     - Dubbo will export both MetadataService and MetadataServiceV2 with triple
@@ -312,7 +354,6 @@ public class ApplicationConfig extends AbstractConfig {
      * <br>  It only activates when meet at least one of the following cases:
      * <br>     1. Manually set {@link #metadataServiceProtocol} = tri
      * <br>     2. Your services are using triple protocol
-     * <br>
      */
     private Boolean onlyUseMetadataV2;
 

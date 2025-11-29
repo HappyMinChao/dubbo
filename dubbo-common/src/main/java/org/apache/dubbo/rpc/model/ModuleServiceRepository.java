@@ -32,6 +32,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 /**
+ * 服务模块仓库， 存储器。
  * Service repository for module
  */
 public class ModuleServiceRepository {
