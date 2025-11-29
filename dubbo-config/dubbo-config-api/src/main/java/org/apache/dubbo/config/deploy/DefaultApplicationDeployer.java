@@ -189,7 +189,7 @@ public class DefaultApplicationDeployer extends AbstractDeployer<ApplicationMode
     /**
      * 检查是否注册消费者实例
      * 通过检查应用配置中的registerConsumer属性来决定是否注册纯消费者的实例
-     * 
+     *
      * @return 如果需要注册消费者实例返回true，否则返回false
      */
     private boolean isRegisterConsumerInstance() {
@@ -509,7 +509,7 @@ public class DefaultApplicationDeployer extends AbstractDeployer<ApplicationMode
 
     /**
      * 将注册中心配置转换为配置中心配置
-     * 
+     *
      * @param registryConfig 注册中心配置
      * @return 配置中心配置
      */
@@ -610,7 +610,7 @@ public class DefaultApplicationDeployer extends AbstractDeployer<ApplicationMode
 
     /**
      * 检查是否使用注册中心作为元数据中心
-     * 
+     *
      * @param registryConfig 注册中心配置
      * @return 如果使用注册中心作为元数据中心返回true，否则返回false
      */
@@ -724,7 +724,7 @@ public class DefaultApplicationDeployer extends AbstractDeployer<ApplicationMode
 
     /**
      * 获取与注册中心兼容的地址
-     * 
+     *
      * @param registryConfig 注册中心配置
      * @return 兼容的地址
      */
@@ -806,7 +806,7 @@ public class DefaultApplicationDeployer extends AbstractDeployer<ApplicationMode
     /**
      * 检查是否存在待处理的模块
      * 待处理的模块是指那些尚未启动的模块
-     * 
+     *
      * @return 如果存在待处理模块返回true，否则返回false
      */
     private boolean hasPendingModule() {
@@ -824,15 +824,6 @@ public class DefaultApplicationDeployer extends AbstractDeployer<ApplicationMode
     @Override
     public Future getStartFuture() {
         return startFuture;
-    }
-
-    /**
-     * 导出元数据服务
-     * 同步导出元数据服务
-     */
-    @Override
-    public synchronized void exportMetadataService() {
-        doExportMetadataService();
     }
 
     /**
@@ -889,7 +880,7 @@ public class DefaultApplicationDeployer extends AbstractDeployer<ApplicationMode
     /**
      * 准备应用实例
      * 导出指标服务并在需要时注册本地服务实例
-     * 
+     *
      * @param moduleModel 模块模型
      */
     @Override
@@ -925,6 +916,7 @@ public class DefaultApplicationDeployer extends AbstractDeployer<ApplicationMode
      * 准备内部模块
      * 确保内部模块已初始化和启动
      */
+    @Override
     public void prepareInternalModule() {
         // 如果内部模块已经准备好，直接返回
         if (hasPreparedInternalModule) {
@@ -996,7 +988,7 @@ public class DefaultApplicationDeployer extends AbstractDeployer<ApplicationMode
     /**
      * 检查是否导出了服务
      * 检查所有模块中是否有配置了服务导出
-     * 
+     *
      * @return 如果导出了服务返回true，否则返回false
      */
     private boolean hasExportedServices() {
@@ -1011,7 +1003,7 @@ public class DefaultApplicationDeployer extends AbstractDeployer<ApplicationMode
     /**
      * 检查是否在后台运行
      * 如果有任何模块在后台运行，则返回true
-     * 
+     *
      * @return 是否在后台运行
      */
     @Override
@@ -1027,7 +1019,7 @@ public class DefaultApplicationDeployer extends AbstractDeployer<ApplicationMode
     /**
      * 准备环境配置
      * 从配置中心获取配置并更新环境变量
-     * 
+     *
      * @param configCenter 配置中心配置
      * @return 动态配置对象
      */
@@ -1058,7 +1050,7 @@ public class DefaultApplicationDeployer extends AbstractDeployer<ApplicationMode
                     throw new IllegalStateException(e);
                 }
             }
-            
+
             // 获取应用模型
             ApplicationModel applicationModel = getApplicationModel();
 
@@ -1072,7 +1064,7 @@ public class DefaultApplicationDeployer extends AbstractDeployer<ApplicationMode
                             "Got global remote configuration from config center with key-%s and group-%s: \n %s",
                             configCenter.getConfigFile(), configCenter.getGroup(), configContent));
                 }
-                
+
                 String appGroup = "";
                 String appConfigContent = null;
                 String appConfigFile = null;
@@ -1094,7 +1086,7 @@ public class DefaultApplicationDeployer extends AbstractDeployer<ApplicationMode
                         }
                     }
                 }
-                
+
                 try {
                     // 解析配置属性
                     Map<String, String> configMap = parseProperties(configContent);
@@ -1319,7 +1311,7 @@ public class DefaultApplicationDeployer extends AbstractDeployer<ApplicationMode
     /**
      * 执行单个服务的离线操作
      * 从注册中心注销指定的服务URL
-     * 
+     *
      * @param statedURL 已注册的服务URL信息
      */
     private void doOffline(ProviderModel.RegisterStatedURL statedURL) {
@@ -1377,7 +1369,7 @@ public class DefaultApplicationDeployer extends AbstractDeployer<ApplicationMode
     /**
      * 通知模块状态变更
      * 当模块状态发生变化时调用此方法，用于同步状态锁并通知所有等待的线程
-     * 
+     *
      * @param moduleModel 模块模型
      * @param state       新的状态
      */
@@ -1394,7 +1386,7 @@ public class DefaultApplicationDeployer extends AbstractDeployer<ApplicationMode
     /**
      * 检查并更新应用状态
      * 根据模块的状态计算应用的整体状态，并执行相应的状态转换操作
-     * 
+     *
      * @param moduleModel  模块模型
      * @param moduleState  模块状态
      */
@@ -1446,7 +1438,7 @@ public class DefaultApplicationDeployer extends AbstractDeployer<ApplicationMode
     /**
      * 计算应用状态
      * 根据所有模块的状态统计信息来确定应用的整体状态
-     * 
+     *
      * @return 应用的部署状态
      */
     private DeployState calculateState() {
@@ -1622,7 +1614,7 @@ public class DefaultApplicationDeployer extends AbstractDeployer<ApplicationMode
     /**
      * 完成启动Future
      * 根据启动结果完成启动Future对象
-     * 
+     *
      * @param success 启动是否成功
      */
     private void completeStartFuture(boolean success) {
@@ -1670,7 +1662,7 @@ public class DefaultApplicationDeployer extends AbstractDeployer<ApplicationMode
     /**
      * 处理失败状态
      * 将应用状态转换为失败(FAILED)，并记录错误日志
-     * 
+     *
      * @param msg 错误消息
      * @param ex  异常对象
      */
@@ -1735,7 +1727,7 @@ public class DefaultApplicationDeployer extends AbstractDeployer<ApplicationMode
     /**
      * 获取应用配置或抛出异常
      * 如果应用配置不存在则抛出IllegalStateException异常
-     * 
+     *
      * @return 应用配置对象
      */
     private ApplicationConfig getApplicationOrElseThrow() {
@@ -1744,7 +1736,7 @@ public class DefaultApplicationDeployer extends AbstractDeployer<ApplicationMode
 
     /**
      * 获取应用配置（可选）
-     * 
+     *
      * @return 应用配置对象的Optional包装
      */
     private Optional<ApplicationConfig> getApplication() {
