@@ -90,33 +90,54 @@ import static org.apache.dubbo.common.constants.LoggerCodeConstants.COMMON_ERROR
 import static org.apache.dubbo.common.constants.LoggerCodeConstants.CONFIG_FAILED_LOAD_ENV_VARIABLE;
 
 /**
- * {@link org.apache.dubbo.rpc.model.ApplicationModel}, {@code DubboBootstrap} and this class are
- * at present designed to be singleton or static (by itself totally static or uses some static fields).
- * So the instances returned from them are of process or classloader scope. If you want to support
- * multiple dubbo servers in a single process, you may need to refactor these three classes.
+ * 扩展加载器类
+ * 
+ * Dubbo的SPI（Service Provider Interface）扩展点加载机制的核心实现类。
+ * 该类负责加载、缓存和管理所有的扩展实现。
+ * 
  * <p>
- * Load dubbo extensions
+ * {@link org.apache.dubbo.rpc.model.ApplicationModel}、{@code DubboBootstrap} 和此类
+ * 目前被设计为单例或静态的（本身完全静态或使用一些静态字段）。
+ * 因此从它们返回的实例属于进程或类加载器作用域。
+ * 如果你想在单个进程中支持多个Dubbo服务器，你可能需要重构这三个类。
+ * 
+ * <p>
+ * <b>主要功能：</b>
  * <ul>
- * <li>auto inject dependency extension </li>
- * <li>auto wrap extension in wrapper </li>
- * <li>default extension is an adaptive instance</li>
+ * <li>加载Dubbo扩展</li>
+ * <li>自动注入依赖扩展（IOC）</li>
+ * <li>自动包装扩展（AOP）</li>
+ * <li>默认扩展是一个自适应实例（Adaptive）</li>
+ * <li>支持扩展激活（Activate）</li>
  * </ul>
+ * 
+ * <p>
+ * <b>扩展加载策略：</b>
+ * <ul>
+ * <li>DubboInternalLoadingStrategy: META-INF/dubbo/internal/</li>
+ * <li>DubboLoadingStrategy: META-INF/dubbo/</li>
+ * <li>ServicesLoadingStrategy: META-INF/services/</li>
+ * </ul>
+ * 
+ * <p>
+ * <b>使用示例：</b>
+ * <pre>
+ * // 获取扩展加载器
+ * ExtensionLoader<Protocol> loader = ExtensionLoader.getExtensionLoader(Protocol.class);
+ * // 获取指定名称的扩展
+ * Protocol protocol = loader.getExtension("dubbo");
+ * // 获取自适应扩展
+ * Protocol adaptiveProtocol = loader.getAdaptiveExtension();
+ * // 获取激活的扩展
+ * List<Filter> filters = loader.getActivateExtension(url, "filter");
+ * </pre>
  *
+ * @param <T> 扩展点接口类型
+ * 
  * @see <a href="http://java.sun.com/j2se/1.5.0/docs/guide/jar/jar.html#Service%20Provider">Service Provider in Java 5</a>
  * @see org.apache.dubbo.common.extension.SPI
  * @see org.apache.dubbo.common.extension.Adaptive
  * @see org.apache.dubbo.common.extension.Activate
- */
-/**
- * 扩展加载器类
- * 用于加载Dubbo的SPI扩展机制实现
- * <p>
- * 加载Dubbo扩展功能
- * <ul>
- * <li>自动注入依赖扩展</li>
- * <li>自动包装扩展</li>
- * <li>默认扩展是一个自适应实例</li>
- * </ul>
  */
 public class ExtensionLoader<T> {
 
@@ -322,6 +343,12 @@ public class ExtensionLoader<T> {
         return asList(strategies);
     }
 
+    /**
+     * 获取忽略注入方法描述列表
+     * 获取不需要进行依赖注入的方法
+     * 
+     * @return 忽略注入方法描述列表
+     */
     private static List<String> getIgnoredInjectMethodsDesc() {
         List<String> ignoreInjectMethodsDesc = new ArrayList<>();
         Arrays.stream(ScopeModelAware.class.getMethods())
@@ -333,6 +360,14 @@ public class ExtensionLoader<T> {
         return ignoreInjectMethodsDesc;
     }
 
+    /**
+     * 构造函数
+     * 创建扩展加载器实例
+     * 
+     * @param type 扩展点接口类型
+     * @param extensionDirector 扩展导演，用于管理扩展加载器
+     * @param scopeModel 作用域模型，表示扩展的生命周期范围
+     */
     ExtensionLoader(Class<?> type, ExtensionDirector extensionDirector, ScopeModel scopeModel) {
         this.type = type;
         this.extensionDirector = extensionDirector;
@@ -345,6 +380,10 @@ public class ExtensionLoader<T> {
         this.scopeModel = scopeModel;
     }
 
+    /**
+     * 初始化实例化策略
+     * 从扩展后处理器中获取实例化策略
+     */
     private void initInstantiationStrategy() {
         instantiationStrategy = extensionPostProcessors.stream()
                 .filter(extensionPostProcessor -> extensionPostProcessor instanceof ScopeModelAccessor)
