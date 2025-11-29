@@ -22,6 +22,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * 禁用注入注解
+ * 用于标记不需要自动注入依赖的扩展点
+ * Disable injection annotation
+ * Used to mark extension points that do not require automatic dependency injection
+ */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.METHOD})

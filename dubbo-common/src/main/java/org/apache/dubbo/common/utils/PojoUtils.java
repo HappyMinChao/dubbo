@@ -364,9 +364,9 @@ public class PojoUtils {
 
         if (ReflectUtils.isPrimitives(pojo.getClass())
                 && !(type != null
-                        && type.isArray()
-                        && type.getComponentType().isEnum()
-                        && pojo.getClass() == String[].class)) {
+                && type.isArray()
+                && type.getComponentType().isEnum()
+                && pojo.getClass() == String[].class)) {
             return CompatibleTypeUtils.compatibleTypeConvert(pojo, type);
         }
 

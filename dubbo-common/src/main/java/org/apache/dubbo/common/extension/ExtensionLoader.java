@@ -107,58 +107,164 @@ import static org.apache.dubbo.common.constants.LoggerCodeConstants.CONFIG_FAILE
  * @see org.apache.dubbo.common.extension.Adaptive
  * @see org.apache.dubbo.common.extension.Activate
  */
+/**
+ * 扩展加载器类
+ * 用于加载Dubbo的SPI扩展机制实现
+ * <p>
+ * 加载Dubbo扩展功能
+ * <ul>
+ * <li>自动注入依赖扩展</li>
+ * <li>自动包装扩展</li>
+ * <li>默认扩展是一个自适应实例</li>
+ * </ul>
+ */
 public class ExtensionLoader<T> {
 
+    /** 
+     * 日志记录器
+     */
     private static final ErrorTypeAwareLogger logger = LoggerFactory.getErrorTypeAwareLogger(ExtensionLoader.class);
 
+    /** 
+     * 名称分隔符正则表达式
+     */
     private static final Pattern NAME_SEPARATOR = Pattern.compile("\\s*[,]+\\s*");
+    /** 
+     * 特殊SPI配置文件名
+     */
     private static final String SPECIAL_SPI_PROPERTIES = "special_spi.properties";
 
+    /** 
+     * 扩展实例缓存映射
+     */
     private final ConcurrentMap<Class<?>, Object> extensionInstances = new ConcurrentHashMap<>(64);
 
+    /** 
+     * 扩展类型
+     */
     private final Class<?> type;
 
+    /** 
+     * 扩展注入器
+     */
     private final ExtensionInjector injector;
 
+    /** 
+     * 缓存名称映射
+     */
     private final ConcurrentMap<Class<?>, String> cachedNames = new ConcurrentHashMap<>();
 
+    /** 
+     * 加载扩展类锁
+     */
     private final ReentrantLock loadExtensionClassesLock = new ReentrantLock();
+    /** 
+     * 缓存类持有者
+     */
     private final Holder<Map<String, Class<?>>> cachedClasses = new Holder<>();
 
+    /** 
+     * 缓存激活映射
+     */
     private final Map<String, Object> cachedActivates = Collections.synchronizedMap(new LinkedHashMap<>());
+    /** 
+     * 缓存激活组映射
+     */
     private final Map<String, Set<String>> cachedActivateGroups = Collections.synchronizedMap(new LinkedHashMap<>());
+    /** 
+     * 缓存激活值映射
+     */
     private final Map<String, String[][]> cachedActivateValues = Collections.synchronizedMap(new LinkedHashMap<>());
+    /** 
+     * 缓存实例映射
+     */
     private final ConcurrentMap<String, Holder<Object>> cachedInstances = new ConcurrentHashMap<>();
+    /** 
+     * 缓存自适应实例持有者
+     */
     private final Holder<Object> cachedAdaptiveInstance = new Holder<>();
+    /** 
+     * 缓存自适应类
+     */
     private volatile Class<?> cachedAdaptiveClass = null;
+    /** 
+     * 缓存默认名称
+     */
     private String cachedDefaultName;
+    /** 
+     * 创建自适应实例错误
+     */
     private volatile Throwable createAdaptiveInstanceError;
 
+    /** 
+     * 缓存包装类集合
+     */
     private Set<Class<?>> cachedWrapperClasses;
 
+    /** 
+     * 异常映射
+     */
     private final Map<String, IllegalStateException> exceptions = new ConcurrentHashMap<>();
 
+    /** 
+     * 加载策略数组
+     */
     private static volatile LoadingStrategy[] strategies = loadLoadingStrategies();
 
+    /** 
+     * 特殊SPI加载策略映射
+     */
     private static final Map<String, String> specialSPILoadingStrategyMap = getSpecialSPILoadingStrategyMap();
 
+    /** 
+     * URL列表映射缓存
+     */
     private static SoftReference<ConcurrentHashMap<java.net.URL, List<String>>> urlListMapCache =
             new SoftReference<>(new ConcurrentHashMap<>());
 
+    /** 
+     * 忽略注入方法描述列表
+     */
     private static final List<String> ignoredInjectMethodsDesc = getIgnoredInjectMethodsDesc();
 
     /**
      * Record all unacceptable exceptions when using SPI
      */
+    /** 
+     * 不可接受异常集合
+     */
     private final Set<String> unacceptableExceptions = new ConcurrentHashSet<>();
 
+    /** 
+     * 扩展导演
+     */
     private final ExtensionDirector extensionDirector;
+    /** 
+     * 扩展后处理器列表
+     */
     private final List<ExtensionPostProcessor> extensionPostProcessors;
+    /** 
+     * 实例化策略
+     */
     private InstantiationStrategy instantiationStrategy;
+    /** 
+     * 激活比较器
+     */
     private final ActivateComparator activateComparator;
+    /** 
+     * 作用域模型
+     */
     private final ScopeModel scopeModel;
+    /** 
+     * 销毁标志
+     */
     private final AtomicBoolean destroyed = new AtomicBoolean();
 
+    /**
+     * 设置加载策略
+     * 
+     * @param strategies 加载策略数组
+     */
     public static void setLoadingStrategies(LoadingStrategy... strategies) {
         if (ArrayUtils.isNotEmpty(strategies)) {
             ExtensionLoader.strategies = strategies;
@@ -171,6 +277,11 @@ public class ExtensionLoader<T> {
      * @return non-null
      * @since 2.7.7
      */
+    /**
+     * 加载所有优先级的加载策略
+     * 
+     * @return 加载策略数组
+     */
     private static LoadingStrategy[] loadLoadingStrategies() {
         return stream(load(LoadingStrategy.class).spliterator(), false).sorted().toArray(LoadingStrategy[]::new);
     }
@@ -180,6 +291,12 @@ public class ExtensionLoader<T> {
      * application startup very slow
      *
      * @return
+     */
+    /**
+     * 获取特殊SPI加载策略映射
+     * 某些SPI仅由Dubbo框架实现，扫描多个类加载器资源可能导致应用程序启动非常缓慢
+     * 
+     * @return 特殊SPI加载策略映射
      */
     private static Map<String, String> getSpecialSPILoadingStrategyMap() {
         Map map = new ConcurrentHashMap<>();
@@ -195,6 +312,11 @@ public class ExtensionLoader<T> {
      * @see LoadingStrategy
      * @see Prioritized
      * @since 2.7.7
+     */
+    /**
+     * 获取所有加载策略
+     * 
+     * @return 加载策略列表
      */
     public static List<LoadingStrategy> getLoadingStrategies() {
         return asList(strategies);
@@ -238,19 +360,36 @@ public class ExtensionLoader<T> {
      * @see ExtensionDirector#getExtensionLoader(java.lang.Class)
      * @deprecated get extension loader from extension director of some module.
      */
+    /**
+     * 获取扩展加载器
+     * 
+     * @param type 扩展类型
+     * @param <T> 扩展类型泛型
+     * @return 扩展加载器实例
+     * @deprecated 从某个模块的扩展导演获取扩展加载器
+     */
     @Deprecated
     public static <T> ExtensionLoader<T> getExtensionLoader(Class<T> type) {
         return ApplicationModel.defaultModel().getDefaultModule().getExtensionLoader(type);
     }
 
+    /**
+     * 重置扩展加载器
+     * 
+     * @param type 扩展类型
+     * @deprecated 已废弃
+     */
     @Deprecated
     public static void resetExtensionLoader(Class type) {}
 
+    /**
+     * 销毁扩展加载器
+     */
     public void destroy() {
         if (!destroyed.compareAndSet(false, true)) {
             return;
         }
-        // destroy raw extension instance
+        // 销毁原始扩展实例
         extensionInstances.forEach((type, instance) -> {
             if (instance instanceof Disposable) {
                 Disposable disposable = (Disposable) instance;
@@ -263,7 +402,7 @@ public class ExtensionLoader<T> {
         });
         extensionInstances.clear();
 
-        // destroy wrapped extension instance
+        // 销毁包装的扩展实例
         for (Holder<Object> holder : cachedInstances.values()) {
             Object wrappedInstance = holder.get();
             if (wrappedInstance instanceof Disposable) {
@@ -278,16 +417,31 @@ public class ExtensionLoader<T> {
         cachedInstances.clear();
     }
 
+    /**
+     * 检查是否已销毁
+     */
     private void checkDestroyed() {
         if (destroyed.get()) {
             throw new IllegalStateException("ExtensionLoader is destroyed: " + type);
         }
     }
 
+    /**
+     * 获取扩展名称
+     * 
+     * @param extensionInstance 扩展实例
+     * @return 扩展名称
+     */
     public String getExtensionName(T extensionInstance) {
         return getExtensionName(extensionInstance.getClass());
     }
 
+    /**
+     * 获取扩展名称
+     * 
+     * @param extensionClass 扩展类
+     * @return 扩展名称
+     */
     public String getExtensionName(Class<?> extensionClass) {
         getExtensionClasses(); // load class
         return cachedNames.get(extensionClass);
@@ -299,6 +453,15 @@ public class ExtensionLoader<T> {
      * @param url url
      * @param key url parameter key which used to get extension point names
      * @return extension list which are activated.
+     * @see #getActivateExtension(org.apache.dubbo.common.URL, String, String)
+     */
+    /**
+     * 获取激活扩展
+     * 等同于 {@code getActivateExtension(url, key, null)}
+     * 
+     * @param url URL
+     * @param key 用于获取扩展点名称的URL参数键
+     * @return 激活的扩展列表
      * @see #getActivateExtension(org.apache.dubbo.common.URL, String, String)
      */
     public List<T> getActivateExtension(URL url, String key) {
@@ -313,6 +476,15 @@ public class ExtensionLoader<T> {
      * @return extension list which are activated
      * @see #getActivateExtension(org.apache.dubbo.common.URL, String[], String)
      */
+    /**
+     * 获取激活扩展
+     * 等同于 {@code getActivateExtension(url, values, null)}
+     * 
+     * @param url URL
+     * @param values 扩展点名称数组
+     * @return 激活的扩展列表
+     * @see #getActivateExtension(org.apache.dubbo.common.URL, String[], String)
+     */
     public List<T> getActivateExtension(URL url, String[] values) {
         return getActivateExtension(url, values, null);
     }
@@ -324,6 +496,16 @@ public class ExtensionLoader<T> {
      * @param key   url parameter key which used to get extension point names
      * @param group group
      * @return extension list which are activated.
+     * @see #getActivateExtension(org.apache.dubbo.common.URL, String[], String)
+     */
+    /**
+     * 获取激活扩展
+     * 等同于 {@code getActivateExtension(url, url.getParameter(key).split(","), null)}
+     * 
+     * @param url URL
+     * @param key 用于获取扩展点名称的URL参数键
+     * @param group 组
+     * @return 激活的扩展列表
      * @see #getActivateExtension(org.apache.dubbo.common.URL, String[], String)
      */
     public List<T> getActivateExtension(URL url, String key, String group) {
@@ -340,10 +522,19 @@ public class ExtensionLoader<T> {
      * @return extension list which are activated
      * @see org.apache.dubbo.common.extension.Activate
      */
+    /**
+     * 获取激活扩展
+     * 
+     * @param url URL
+     * @param values 扩展点名称数组
+     * @param group 组
+     * @return 激活的扩展列表
+     * @see org.apache.dubbo.common.extension.Activate
+     */
     @SuppressWarnings("deprecation")
     public List<T> getActivateExtension(URL url, String[] values, String group) {
         checkDestroyed();
-        // solve the bug of using @SPI's wrapper method to report a null pointer exception.
+        // 解决使用@SPI的包装方法报告空指针异常的bug
         Map<Class<?>, T> activateExtensionsMap = new TreeMap<>(activateComparator);
         List<String> names = values == null
                 ? new ArrayList<>(0)
@@ -352,7 +543,7 @@ public class ExtensionLoader<T> {
         if (!namesSet.contains(REMOVE_VALUE_PREFIX + DEFAULT_KEY)) {
             if (cachedActivateGroups.size() == 0) {
                 synchronized (cachedActivateGroups) {
-                    // cache all extensions
+                    // 缓存所有扩展
                     if (cachedActivateGroups.size() == 0) {
                         getExtensionClasses();
                         for (Map.Entry<String, Object> entry : cachedActivates.entrySet()) {
@@ -391,7 +582,7 @@ public class ExtensionLoader<T> {
                 }
             }
 
-            // traverse all cached extensions
+            // 遍历所有缓存的扩展
             cachedActivateGroups.forEach((name, activateGroup) -> {
                 if (isMatchGroup(group, activateGroup)
                         && !namesSet.contains(name)
@@ -404,9 +595,8 @@ public class ExtensionLoader<T> {
         }
 
         if (namesSet.contains(DEFAULT_KEY)) {
-            // will affect order
-            // `ext1,default,ext2` means ext1 will happens before all of the default extensions while ext2 will after
-            // them
+            // 将影响顺序
+            // `ext1,default,ext2` 意味着ext1将在所有默认扩展之前发生，而ext2将在它们之后
             ArrayList<T> extensionsResult = new ArrayList<>(activateExtensionsMap.size() + names.size());
             for (String name : names) {
                 if (name.startsWith(REMOVE_VALUE_PREFIX) || namesSet.contains(REMOVE_VALUE_PREFIX + name)) {
@@ -422,7 +612,7 @@ public class ExtensionLoader<T> {
             }
             return extensionsResult;
         } else {
-            // add extensions, will be sorted by its order
+            // 添加扩展，将按其顺序排序
             for (String name : names) {
                 if (name.startsWith(REMOVE_VALUE_PREFIX) || namesSet.contains(REMOVE_VALUE_PREFIX + name)) {
                     continue;
@@ -546,6 +736,13 @@ public class ExtensionLoader<T> {
      *
      * @throws IllegalStateException If the specified extension is not found.
      */
+    /**
+     * 根据名称获取扩展
+     * 
+     * @param name 扩展名称
+     * @return 扩展实例
+     * @throws IllegalStateException 如果未找到指定的扩展
+     */
     public T getExtension(String name) {
         T extension = getExtension(name, true);
         if (extension == null) {
@@ -554,6 +751,13 @@ public class ExtensionLoader<T> {
         return extension;
     }
 
+    /**
+     * 根据名称获取扩展
+     * 
+     * @param name 扩展名称
+     * @param wrap 是否包装
+     * @return 扩展实例
+     */
     @SuppressWarnings("unchecked")
     public T getExtension(String name, boolean wrap) {
         checkDestroyed();
@@ -587,12 +791,23 @@ public class ExtensionLoader<T> {
      * @param name the name of extension
      * @return non-null
      */
+    /**
+     * 获取指定名称的扩展，如果找到则返回，否则返回默认扩展
+     * 
+     * @param name 扩展名称
+     * @return 扩展实例
+     */
     public T getOrDefaultExtension(String name) {
         return containsExtension(name) ? getExtension(name) : getDefaultExtension();
     }
 
     /**
      * Return default extension, return <code>null</code> if it's not configured.
+     */
+    /**
+     * 返回默认扩展，如果未配置则返回<code>null</code>
+     * 
+     * @return 默认扩展实例
      */
     public T getDefaultExtension() {
         getExtensionClasses();
@@ -602,6 +817,12 @@ public class ExtensionLoader<T> {
         return getExtension(cachedDefaultName);
     }
 
+    /**
+     * 判断是否包含指定名称的扩展
+     * 
+     * @param name 扩展名称
+     * @return 如果包含指定扩展则返回true，否则返回false
+     */
     public boolean hasExtension(String name) {
         checkDestroyed();
         if (StringUtils.isEmpty(name)) {
@@ -611,12 +832,22 @@ public class ExtensionLoader<T> {
         return c != null;
     }
 
+    /**
+     * 获取支持的扩展名称集合
+     * 
+     * @return 支持的扩展名称集合
+     */
     public Set<String> getSupportedExtensions() {
         checkDestroyed();
         Map<String, Class<?>> classes = getExtensionClasses();
         return Collections.unmodifiableSet(new TreeSet<>(classes.keySet()));
     }
 
+    /**
+     * 获取支持的扩展实例集合
+     * 
+     * @return 支持的扩展实例集合
+     */
     public Set<T> getSupportedExtensionInstances() {
         checkDestroyed();
         List<T> instances = new LinkedList<>();
@@ -626,13 +857,18 @@ public class ExtensionLoader<T> {
                 instances.add(getExtension(name));
             }
         }
-        // sort the Prioritized instances
+        // 对优先级实例进行排序
         instances.sort(Prioritized.COMPARATOR);
         return new LinkedHashSet<>(instances);
     }
 
     /**
      * Return default extension name, return <code>null</code> if not configured.
+     */
+    /**
+     * 返回默认扩展名称，如果未配置则返回<code>null</code>
+     * 
+     * @return 默认扩展名称
      */
     public String getDefaultExtensionName() {
         getExtensionClasses();
@@ -645,6 +881,13 @@ public class ExtensionLoader<T> {
      * @param name  extension name
      * @param clazz extension class
      * @throws IllegalStateException when extension with the same name has already been registered.
+     */
+    /**
+     * 通过API注册新扩展
+     * 
+     * @param name 扩展名称
+     * @param clazz 扩展类
+     * @throws IllegalStateException 当同名扩展已注册时抛出异常
      */
     public void addExtension(String name, Class<?> clazz) {
         checkDestroyed();
@@ -684,6 +927,14 @@ public class ExtensionLoader<T> {
      * @throws IllegalStateException when extension to be placed doesn't exist
      * @deprecated not recommended any longer, and use only when test
      */
+    /**
+     * 通过API替换现有扩展
+     * 
+     * @param name 扩展名称
+     * @param clazz 扩展类
+     * @throws IllegalStateException 当要替换的扩展不存在时抛出异常
+     * @deprecated 不再推荐使用，仅在测试时使用
+     */
     @Deprecated
     public void replaceExtension(String name, Class<?> clazz) {
         checkDestroyed();
@@ -717,6 +968,11 @@ public class ExtensionLoader<T> {
         }
     }
 
+    /**
+     * 获取自适应扩展
+     * 
+     * @return 自适应扩展实例
+     */
     @SuppressWarnings("unchecked")
     public T getAdaptiveExtension() {
         checkDestroyed();

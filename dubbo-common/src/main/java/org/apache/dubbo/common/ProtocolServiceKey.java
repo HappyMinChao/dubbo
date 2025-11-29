@@ -21,22 +21,51 @@ import org.apache.dubbo.common.utils.StringUtils;
 
 import java.util.Objects;
 
+/**
+ * 协议服务键
+ * 用于唯一标识一个服务，包含接口名、版本号、分组和协议信息
+ */
 public class ProtocolServiceKey extends ServiceKey {
+    /** 协议 */
     private final String protocol;
 
+    /**
+     * 构造函数
+     * 
+     * @param interfaceName 接口名称
+     * @param version 版本号
+     * @param group 分组
+     * @param protocol 协议
+     */
     public ProtocolServiceKey(String interfaceName, String version, String group, String protocol) {
         super(interfaceName, version, group);
         this.protocol = protocol;
     }
 
+    /**
+     * 获取协议
+     * 
+     * @return 协议
+     */
     public String getProtocol() {
         return protocol;
     }
 
+    /**
+     * 获取服务键字符串
+     * 
+     * @return 服务键字符串
+     */
     public String getServiceKeyString() {
         return super.toString();
     }
 
+    /**
+     * 判断是否与指定的协议服务键相同
+     * 
+     * @param protocolServiceKey 协议服务键
+     * @return 如果相同返回true，否则返回false
+     */
     public boolean isSameWith(ProtocolServiceKey protocolServiceKey) {
         // interface version group should be the same
         if (!super.equals(protocolServiceKey)) {
@@ -82,7 +111,17 @@ public class ProtocolServiceKey extends ServiceKey {
         return super.toString() + CommonConstants.GROUP_CHAR_SEPARATOR + protocol;
     }
 
+    /**
+     * 协议服务键匹配器
+     */
     public static class Matcher {
+        /**
+         * 判断规则协议服务键是否与目标协议服务键匹配
+         * 
+         * @param rule 规则协议服务键
+         * @param target 目标协议服务键
+         * @return 如果匹配返回true，否则返回false
+         */
         public static boolean isMatch(ProtocolServiceKey rule, ProtocolServiceKey target) {
             // 1. 2. 3. match interface / version / group
             if (!ServiceKey.Matcher.isMatch(rule, target)) {

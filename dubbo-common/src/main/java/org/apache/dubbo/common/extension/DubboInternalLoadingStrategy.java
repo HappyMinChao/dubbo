@@ -17,22 +17,47 @@
 package org.apache.dubbo.common.extension;
 
 /**
+ * Dubbo内部{@link LoadingStrategy}
  * Dubbo internal {@link LoadingStrategy}
  *
  * @since 2.7.7
  */
 public class DubboInternalLoadingStrategy implements LoadingStrategy {
 
+    /**
+     * 获取目录路径
+     * 
+     * @return 目录路径 "META-INF/dubbo/internal/"
+     * Get directory path
+     * 
+     * @return directory path "META-INF/dubbo/internal/"
+     */
     @Override
     public String directory() {
         return "META-INF/dubbo/internal/";
     }
 
+    /**
+     * 获取优先级
+     * 
+     * @return 最大优先级
+     * Get priority
+     * 
+     * @return maximum priority
+     */
     @Override
     public int getPriority() {
         return MAX_PRIORITY;
     }
 
+    /**
+     * 获取名称
+     * 
+     * @return 名称 "DUBBO_INTERNAL"
+     * Get name
+     * 
+     * @return name "DUBBO_INTERNAL"
+     */
     @Override
     public String getName() {
         return "DUBBO_INTERNAL";

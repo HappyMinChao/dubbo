@@ -25,6 +25,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * 为{@link ExtensionLoader}提供有用信息以注入依赖扩展实例。
+ *
+ * @see ExtensionLoader
+ * @see URL
  * Provide helpful information for {@link ExtensionLoader} to inject dependency extension instance.
  *
  * @see ExtensionLoader
@@ -35,6 +39,22 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE, ElementType.METHOD})
 public @interface Adaptive {
     /**
+     * 决定要注入哪个目标扩展。目标扩展的名称由URL中传递的参数决定，参数名称由此方法给出。
+     * <p>
+     * 如果在{@link URL}中找不到指定的参数，则将使用默认扩展进行依赖注入（在其接口的{@link SPI}中指定）。
+     * <p>
+     * 例如，给定<code>String[] {"key1", "key2"}</code>：
+     * <ol>
+     * <li>在URL中查找参数'key1'，使用其值作为扩展的名称</li>
+     * <li>如果在URL中找不到'key1'（或其值为空），则尝试'key2'作为扩展名称</li>
+     * <li>如果'key2'也不存在，则使用默认扩展</li>
+     * <li>否则，抛出{@link IllegalStateException}</li>
+     * </ol>
+     * 如果参数名称为空，则从接口的类名生成默认参数名称，规则是：将类名从大写字母分割成几个部分，
+     * 并用点'.'分隔这些部分，例如，对于{@code org.apache.dubbo.xxx.YyyInvokerWrapper}，生成的名称是
+     * <code>String[] {"yyy.invoker.wrapper"}</code>。
+     *
+     * @return URL中的参数名称
      * Decide which target extension to be injected. The name of the target extension is decided by the parameter passed
      * in the URL, and the parameter names are given by this method.
      * <p>

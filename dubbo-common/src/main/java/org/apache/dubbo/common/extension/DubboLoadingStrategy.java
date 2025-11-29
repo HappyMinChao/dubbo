@@ -18,26 +18,59 @@ package org.apache.dubbo.common.extension;
 
 /**
  * Dubbo {@link LoadingStrategy}
+ * Dubbo加载策略
  *
  * @since 2.7.7
  */
 public class DubboLoadingStrategy implements LoadingStrategy {
 
+    /**
+     * 获取目录路径
+     * 
+     * @return 目录路径 "META-INF/dubbo/"
+     * Get directory path
+     * 
+     * @return directory path "META-INF/dubbo/"
+     */
     @Override
     public String directory() {
         return "META-INF/dubbo/";
     }
 
+    /**
+     * 是否支持覆盖
+     * 
+     * @return 返回true，支持覆盖
+     * Whether supports override
+     * 
+     * @return return true, supports override
+     */
     @Override
     public boolean overridden() {
         return true;
     }
 
+    /**
+     * 获取优先级
+     * 
+     * @return 正常优先级
+     * Get priority
+     * 
+     * @return normal priority
+     */
     @Override
     public int getPriority() {
         return NORMAL_PRIORITY;
     }
 
+    /**
+     * 获取名称
+     * 
+     * @return 名称 "DUBBO"
+     * Get name
+     * 
+     * @return name "DUBBO"
+     */
     @Override
     public String getName() {
         return "DUBBO";

@@ -27,19 +27,38 @@ import java.util.Collections;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+/**
+ * 自适应扩展注入器
+ * Adaptive extension injector
+ */
 @Adaptive
 public class AdaptiveExtensionInjector implements ExtensionInjector, Lifecycle {
 
+    /** 扩展注入器集合 */
     private Collection<ExtensionInjector> injectors = Collections.emptyList();
+    /** 扩展访问器 */
     private ExtensionAccessor extensionAccessor;
 
+    /**
+     * 构造函数
+     */
     public AdaptiveExtensionInjector() {}
 
+    /**
+     * 设置扩展访问器
+     * 
+     * @param extensionAccessor 扩展访问器
+     */
     @Override
     public void setExtensionAccessor(final ExtensionAccessor extensionAccessor) {
         this.extensionAccessor = extensionAccessor;
     }
 
+    /**
+     * 初始化
+     * 
+     * @throws IllegalStateException 非法状态异常
+     */
     @Override
     public void initialize() throws IllegalStateException {
         ExtensionLoader<ExtensionInjector> loader = extensionAccessor.getExtensionLoader(ExtensionInjector.class);
@@ -48,6 +67,14 @@ public class AdaptiveExtensionInjector implements ExtensionInjector, Lifecycle {
                 .collect(Collectors.collectingAndThen(Collectors.toList(), Collections::unmodifiableList));
     }
 
+    /**
+     * 获取实例
+     * 
+     * @param type 类型
+     * @param name 名称
+     * @param <T> 类型泛型
+     * @return 实例
+     */
     @Override
     public <T> T getInstance(final Class<T> type, final String name) {
         return injectors.stream()
@@ -57,9 +84,19 @@ public class AdaptiveExtensionInjector implements ExtensionInjector, Lifecycle {
                 .orElse(null);
     }
 
+    /**
+     * 启动
+     * 
+     * @throws IllegalStateException 非法状态异常
+     */
     @Override
     public void start() throws IllegalStateException {}
 
+    /**
+     * 销毁
+     * 
+     * @throws IllegalStateException 非法状态异常
+     */
     @Override
     public void destroy() throws IllegalStateException {}
 }

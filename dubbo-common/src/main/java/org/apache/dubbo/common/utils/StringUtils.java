@@ -48,48 +48,117 @@ import static org.apache.dubbo.common.constants.CommonConstants.UNDERLINE_SEPARA
 import static org.apache.dubbo.common.constants.CommonConstants.VERSION_KEY;
 import static org.apache.dubbo.common.constants.LoggerCodeConstants.COMMON_JSON_CONVERT_EXCEPTION;
 
+/**
+ * 字符串工具类
+ */
 public final class StringUtils {
 
+    /** 
+     * 空字符串
+     */
     public static final String EMPTY_STRING = "";
+    /** 
+     * 未找到索引
+     */
     public static final int INDEX_NOT_FOUND = -1;
+    /** 
+     * 空字符串数组
+     */
     public static final String[] EMPTY_STRING_ARRAY = new String[0];
 
+    /** 
+     * 日志记录器
+     */
     private static final ErrorTypeAwareLogger logger = LoggerFactory.getErrorTypeAwareLogger(StringUtils.class);
+    /** 
+     * 键值对模式
+     */
     private static final Pattern KVP_PATTERN =
             Pattern.compile("([_.a-zA-Z0-9][-_.a-zA-Z0-9]*)[=](.*)"); // key value pair pattern.
+    /** 
+     * 数字模式
+     */
     private static final Pattern NUM_PATTERN = Pattern.compile("^\\d+$");
+    /** 
+     * 参数模式
+     */
     private static final Pattern PARAMETERS_PATTERN =
             Pattern.compile("^\\[((\\s*\\{\\s*[\\w_\\-\\.]+\\s*:\\s*.+?\\s*\\}\\s*,?\\s*)+)\\s*\\]$");
+    /** 
+     * 键值对参数模式
+     */
     private static final Pattern PAIR_PARAMETERS_PATTERN =
             Pattern.compile("^\\{\\s*([\\w-_\\.]+)\\s*:\\s*(.+)\\s*\\}$");
+    /** 
+     * 填充限制
+     */
     private static final int PAD_LIMIT = 8192;
+    /** 
+     * 十六进制到字节的映射
+     */
     private static final byte[] HEX2B;
 
     /**
      * @since 2.7.5
      */
+    /** 
+     * 等号字符
+     */
     public static final char EQUAL_CHAR = '=';
 
+    /** 
+     * 等号字符串
+     */
     public static final String EQUAL = valueOf(EQUAL_CHAR);
 
+    /** 
+     * 和号字符
+     */
     public static final char AND_CHAR = '&';
 
+    /** 
+     * 和号字符串
+     */
     public static final String AND = valueOf(AND_CHAR);
 
+    /** 
+     * 分号字符
+     */
     public static final char SEMICOLON_CHAR = ';';
 
+    /** 
+     * 分号字符串
+     */
     public static final String SEMICOLON = valueOf(SEMICOLON_CHAR);
 
+    /** 
+     * 问号字符
+     */
     public static final char QUESTION_MASK_CHAR = '?';
 
+    /** 
+     * 问号字符串
+     */
     public static final String QUESTION_MASK = valueOf(QUESTION_MASK_CHAR);
 
+    /** 
+     * 斜杠字符
+     */
     public static final char SLASH_CHAR = '/';
 
+    /** 
+     * 斜杠字符串
+     */
     public static final String SLASH = valueOf(SLASH_CHAR);
 
+    /** 
+     * 连字符
+     */
     public static final char HYPHEN_CHAR = '-';
 
+    /** 
+     * 连字符串
+     */
     public static final String HYPHEN = valueOf(HYPHEN_CHAR);
 
     static {
@@ -119,8 +188,17 @@ public final class StringUtils {
         HEX2B['f'] = (byte) 15;
     }
 
+    /**
+     * 私有构造函数，防止实例化
+     */
     private StringUtils() {}
 
+    /**
+     * 获取字符序列的长度，如果字符序列为null则返回0
+     *
+     * @param cs 字符序列或null
+     * @return 字符序列的长度，如果字符序列为null则返回0
+     */
     /**
      * Gets a CharSequence length or {@code 0} if the CharSequence is
      * {@code null}.
@@ -133,6 +211,22 @@ public final class StringUtils {
         return cs == null ? 0 : cs.length();
     }
 
+    /**
+     * 重复字符串指定次数形成新字符串
+     *
+     * <pre>
+     * StringUtils.repeat(null, 2) = null
+     * StringUtils.repeat("", 0)   = ""
+     * StringUtils.repeat("", 2)   = ""
+     * StringUtils.repeat("a", 3)  = "aaa"
+     * StringUtils.repeat("ab", 2) = "abab"
+     * StringUtils.repeat("a", -2) = ""
+     * </pre>
+     *
+     * @param str 要重复的字符串，可能为null
+     * @param repeat 重复次数，负数视为0
+     * @return 由原始字符串重复组成的新字符串，如果输入字符串为null则返回null
+     */
     /**
      * <p>Repeat a String {@code repeat} times to form a
      * new String.</p>
@@ -191,6 +285,24 @@ public final class StringUtils {
     }
 
     /**
+     * 重复字符串指定次数形成新字符串，每次重复时插入分隔符
+     *
+     * <pre>
+     * StringUtils.repeat(null, null, 2) = null
+     * StringUtils.repeat(null, "x", 2)  = null
+     * StringUtils.repeat("", null, 0)   = ""
+     * StringUtils.repeat("", "", 2)     = ""
+     * StringUtils.repeat("", "x", 3)    = "xxx"
+     * StringUtils.repeat("?", ", ", 3)  = "?, ?, ?"
+     * </pre>
+     *
+     * @param str 要重复的字符串，可能为null
+     * @param separator 要插入的分隔符，可能为null
+     * @param repeat 重复次数，负数视为0
+     * @return 由原始字符串重复组成的新字符串，如果输入字符串为null则返回null
+     * @since 2.5
+     */
+    /**
      * <p>Repeat a String {@code repeat} times to form a
      * new String, with a String separator injected each time. </p>
      *
@@ -219,6 +331,27 @@ public final class StringUtils {
         return removeEnd(result, separator);
     }
 
+    /**
+     * 如果子字符串位于源字符串的末尾，则移除它，否则返回源字符串
+     *
+     * <p>如果源字符串为{@code null}，则返回{@code null}。
+     * 如果源字符串为空("")，则返回空字符串。
+     * 如果搜索字符串为{@code null}，则返回源字符串。</p>
+     *
+     * <pre>
+     * StringUtils.removeEnd(null, *)      = null
+     * StringUtils.removeEnd("", *)        = ""
+     * StringUtils.removeEnd(*, null)      = *
+     * StringUtils.removeEnd("www.domain.com", ".com.")  = "www.domain.com"
+     * StringUtils.removeEnd("www.domain.com", ".com")   = "www.domain"
+     * StringUtils.removeEnd("www.domain.com", "domain") = "www.domain.com"
+     * StringUtils.removeEnd("abc", "")    = "abc"
+     * </pre>
+     *
+     * @param str 源字符串，可能为null
+     * @param remove 要搜索和移除的字符串，可能为null
+     * @return 如果找到则返回移除字符串后的子字符串，如果输入字符串为null则返回null
+     */
     /**
      * <p>Removes a substring only if it is at the end of a source string,
      * otherwise returns the source string.</p>
@@ -252,6 +385,25 @@ public final class StringUtils {
         return str;
     }
 
+    /**
+     * 使用指定的分隔符重复到给定长度返回填充
+     *
+     * <pre>
+     * StringUtils.repeat('e', 0)  = ""
+     * StringUtils.repeat('e', 3)  = "eee"
+     * StringUtils.repeat('e', -2) = ""
+     * </pre>
+     *
+     * <p>注意：此方法不支持使用
+     * <a href="http://www.unicode.org/glossary/#supplementary_character">Unicode补充字符</a>
+     * 进行填充，因为它们需要一对{@code char}来表示。
+     * 如果您需要支持应用程序的完整国际化，请考虑使用{@link #repeat(String, int)}。</p>
+     *
+     * @param ch 要重复的字符
+     * @param repeat 重复字符的次数，负数视为0
+     * @return 包含重复字符的字符串
+     * @see #repeat(String, int)
+     */
     /**
      * <p>Returns padding using the specified delimiter repeated
      * to a given length.</p>

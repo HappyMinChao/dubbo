@@ -1,38 +1,19 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+/**
+ * JSON工具类
+ * JSON Utilities
  */
-package org.apache.dubbo.common.utils;
-
-import org.apache.dubbo.common.extension.Activate;
-import org.apache.dubbo.common.json.JsonUtil;
-
-import java.lang.reflect.Type;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.ServiceLoader;
-import java.util.TreeMap;
-
-import static org.apache.dubbo.common.constants.CommonConstants.DubboProperty.DUBBO_PREFER_JSON_FRAMEWORK_NAME;
-
 public class JsonUtils {
 
+    /** 
+     * JSON工具实例
+     */
     private static volatile JsonUtil jsonUtil;
 
+    /**
+     * 获取JSON工具实例
+     * 
+     * @return JSON工具实例
+     */
     public static JsonUtil getJson() {
         if (jsonUtil == null) {
             synchronized (JsonUtils.class) {
@@ -44,6 +25,11 @@ public class JsonUtils {
         return jsonUtil;
     }
 
+    /**
+     * 创建JSON工具实例
+     * 
+     * @return JSON工具实例
+     */
     private static JsonUtil createJsonUtil() {
         Map<String, JsonUtil> extensions = new HashMap<>();
         String preferName = SystemPropertyConfigUtils.getSystemProperty(DUBBO_PREFER_JSON_FRAMEWORK_NAME);
@@ -76,6 +62,14 @@ public class JsonUtils {
         return sortedExtensions.firstEntry().getValue();
     }
 
+    /**
+     * 加载扩展
+     * 
+     * @param name 名称
+     * @param classLoader 类加载器
+     * @param extensions 扩展映射表
+     * @return JSON工具实例
+     */
     private static JsonUtil loadExtensions(String name, ClassLoader classLoader, Map<String, JsonUtil> extensions) {
         ServiceLoader<JsonUtil> loader = ServiceLoader.load(JsonUtil.class, classLoader);
         Iterator<JsonUtil> it = loader.iterator();
@@ -102,7 +96,7 @@ public class JsonUtils {
     }
 
     /**
-     * @deprecated for unit test only
+     * @deprecated 仅用于单元测试
      */
     @Deprecated
     @SuppressWarnings("DeprecatedIsStillUsed")
@@ -110,70 +104,186 @@ public class JsonUtils {
         jsonUtil = json;
     }
 
+    /**
+     * 将JSON字符串转换为Java对象
+     * 
+     * @param json JSON字符串
+     * @param type 类型
+     * @param <T> 对象类型
+     * @return Java对象
+     */
     public static <T> T toJavaObject(String json, Type type) {
         return getJson().toJavaObject(json, type);
     }
 
+    /**
+     * 将JSON字符串转换为Java列表
+     * 
+     * @param json JSON字符串
+     * @param clazz 类
+     * @param <T> 对象类型
+     * @return Java列表
+     */
     public static <T> List<T> toJavaList(String json, Class<T> clazz) {
         return getJson().toJavaList(json, clazz);
     }
 
+    /**
+     * 将对象转换为JSON字符串
+     * 
+     * @param obj 对象
+     * @return JSON字符串
+     */
     public static String toJson(Object obj) {
         return getJson().toJson(obj);
     }
 
+    /**
+     * 将对象转换为格式化的JSON字符串
+     * 
+     * @param obj 对象
+     * @return 格式化的JSON字符串
+     */
     public static String toPrettyJson(Object obj) {
         return getJson().toPrettyJson(obj);
     }
 
+    /**
+     * 从映射表中获取列表
+     * 
+     * @param obj 映射表
+     * @param key 键
+     * @return 列表
+     */
     public static List<?> getList(Map<String, ?> obj, String key) {
         return getJson().getList(obj, key);
     }
 
+    /**
+     * 从映射表中获取对象列表
+     * 
+     * @param obj 映射表
+     * @param key 键
+     * @return 对象列表
+     */
     public static List<Map<String, ?>> getListOfObjects(Map<String, ?> obj, String key) {
         return getJson().getListOfObjects(obj, key);
     }
 
+    /**
+     * 从映射表中获取字符串列表
+     * 
+     * @param obj 映射表
+     * @param key 键
+     * @return 字符串列表
+     */
     public static List<String> getListOfStrings(Map<String, ?> obj, String key) {
         return getJson().getListOfStrings(obj, key);
     }
 
+    /**
+     * 从映射表中获取对象
+     * 
+     * @param obj 映射表
+     * @param key 键
+     * @return 对象
+     */
     public static Map<String, ?> getObject(Map<String, ?> obj, String key) {
         return getJson().getObject(obj, key);
     }
 
+    /**
+     * 转换对象
+     * 
+     * @param obj 对象
+     * @param targetType 目标类型
+     * @return 转换后的对象
+     */
     public static Object convertObject(Object obj, Type targetType) {
         return getJson().convertObject(obj, targetType);
     }
 
+    /**
+     * 转换对象
+     * 
+     * @param obj 对象
+     * @param targetType 目标类型
+     * @return 转换后的对象
+     */
     public static Object convertObject(Object obj, Class<?> targetType) {
         return getJson().convertObject(obj, targetType);
     }
 
+    /**
+     * 从映射表中获取数字作为双精度浮点数
+     * 
+     * @param obj 映射表
+     * @param key 键
+     * @return 双精度浮点数
+     */
     public static Double getNumberAsDouble(Map<String, ?> obj, String key) {
         return getJson().getNumberAsDouble(obj, key);
     }
 
+    /**
+     * 从映射表中获取数字作为整数
+     * 
+     * @param obj 映射表
+     * @param key 键
+     * @return 整数
+     */
     public static Integer getNumberAsInteger(Map<String, ?> obj, String key) {
         return getJson().getNumberAsInteger(obj, key);
     }
 
+    /**
+     * 从映射表中获取数字作为长整数
+     * 
+     * @param obj 映射表
+     * @param key 键
+     * @return 长整数
+     */
     public static Long getNumberAsLong(Map<String, ?> obj, String key) {
         return getJson().getNumberAsLong(obj, key);
     }
 
+    /**
+     * 从映射表中获取字符串
+     * 
+     * @param obj 映射表
+     * @param key 键
+     * @return 字符串
+     */
     public static String getString(Map<String, ?> obj, String key) {
         return getJson().getString(obj, key);
     }
 
+    /**
+     * 检查对象列表
+     * 
+     * @param rawList 原始列表
+     * @return 对象列表
+     */
     public static List<Map<String, ?>> checkObjectList(List<?> rawList) {
         return getJson().checkObjectList(rawList);
     }
 
+    /**
+     * 检查字符串列表
+     * 
+     * @param rawList 原始列表
+     * @return 字符串列表
+     */
     public static List<String> checkStringList(List<?> rawList) {
         return getJson().checkStringList(rawList);
     }
 
+    /**
+     * 检查JSON字符串是否有效
+     * 
+     * @param json JSON字符串
+     * @return 如果有效返回true，否则返回false
+     */
     public static boolean checkJson(String json) {
         return getJson().isJson(json);
     }

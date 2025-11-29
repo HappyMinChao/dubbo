@@ -17,6 +17,8 @@
 package org.apache.dubbo.common.extension;
 
 /**
+ * 扩展工厂
+ * @deprecated 请使用 {@link ExtensionInjector} 替代
  * ExtensionFactory
  * @deprecated use {@link ExtensionInjector} instead
  */
@@ -30,6 +32,11 @@ public interface ExtensionFactory extends ExtensionInjector {
     }
 
     /**
+     * 获取扩展。
+     *
+     * @param type 对象类型。
+     * @param name 对象名称。
+     * @return 对象实例。
      * Get extension.
      *
      * @param type object type.

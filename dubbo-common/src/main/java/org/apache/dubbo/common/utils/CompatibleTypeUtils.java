@@ -31,27 +31,40 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * 兼容类型工具类
+ * Compatible Type Utilities
+ */
 public class CompatibleTypeUtils {
 
+    /** 
+     * 日期格式
+     */
     private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
     /**
-     * the text to parse such as "2007-12-03T10:15:30"
+     * 要解析的文本，例如 "2007-12-03T10:15:30"
      */
     private static final int ISO_LOCAL_DATE_TIME_MIN_LEN = 19;
 
+    /**
+     * 私有构造函数，防止实例化
+     */
     private CompatibleTypeUtils() {}
 
     /**
-     * Compatible type convert. Null value is allowed to pass in. If no conversion is needed, then the original value
-     * will be returned.
+     * 兼容类型转换。允许传入空值。如果不需要转换，则返回原始值。
      * <p>
-     * Supported compatible type conversions include (primary types and corresponding wrappers are not listed):
+     * 支持的兼容类型转换包括（主要类型及其对应的包装器未列出）：
      * <ul>
      * <li> String -> char, enum, Date
      * <li> byte, short, int, long -> byte, short, int, long
      * <li> float, double -> float, double
      * </ul>
+     * 
+     * @param value 值
+     * @param type 类型
+     * @return 转换后的值
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     public static Object compatibleTypeConvert(Object value, Class<?> type) {

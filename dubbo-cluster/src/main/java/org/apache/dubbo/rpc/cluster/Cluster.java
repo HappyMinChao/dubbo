@@ -25,32 +25,49 @@ import org.apache.dubbo.rpc.model.ScopeModel;
 import org.apache.dubbo.rpc.model.ScopeModelUtil;
 
 /**
- * Cluster. (SPI, Singleton, ThreadSafe)
+ * 集群接口 (SPI, Singleton, ThreadSafe)
  * <p>
- * <a href="http://en.wikipedia.org/wiki/Computer_cluster">Cluster</a>
- * <a href="http://en.wikipedia.org/wiki/Fault-tolerant_system">Fault-Tolerant</a>
+ * <a href="http://en.wikipedia.org/wiki/Computer_cluster">集群</a>
+ * <a href="http://en.wikipedia.org/wiki/Fault-tolerant_system">容错系统</a>
  *
  */
 @SPI(Cluster.DEFAULT)
 public interface Cluster {
 
+    // 默认集群策略为failover（失败转移）
     String DEFAULT = "failover";
 
     /**
-     * Merge the directory invokers to a virtual invoker.
+     * 将目录调用者合并为一个虚拟调用者。
      *
-     * @param <T>
-     * @param directory
-     * @return cluster invoker
-     * @throws RpcException
+     * @param <T> 泛型类型
+     * @param directory 目录
+     * @param buildFilterChain 是否构建过滤器链
+     * @return 集群调用者
+     * @throws RpcException RPC异常
      */
     @Adaptive
     <T> Invoker<T> join(Directory<T> directory, boolean buildFilterChain) throws RpcException;
 
+    /**
+     * 获取集群实例
+     * 
+     * @param scopeModel 作用域模型
+     * @param name 集群名称
+     * @return 集群实例
+     */
     static Cluster getCluster(ScopeModel scopeModel, String name) {
         return getCluster(scopeModel, name, true);
     }
 
+    /**
+     * 获取集群实例
+     * 
+     * @param scopeModel 作用域模型
+     * @param name 集群名称
+     * @param wrap 是否包装
+     * @return 集群实例
+     */
     static Cluster getCluster(ScopeModel scopeModel, String name, boolean wrap) {
         if (StringUtils.isEmpty(name)) {
             name = Cluster.DEFAULT;

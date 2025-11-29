@@ -32,7 +32,17 @@ import org.apache.dubbo.rpc.model.FrameworkModel;
 import org.apache.dubbo.rpc.model.ModuleModel;
 import org.apache.dubbo.rpc.model.ScopeModelInitializer;
 
+/**
+ * 通用作用域模型初始化器
+ * 用于初始化框架、应用和模块级别的模型组件
+ */
 public class CommonScopeModelInitializer implements ScopeModelInitializer {
+    /**
+     * 初始化框架模型
+     * 注册框架级别的Bean组件
+     * 
+     * @param frameworkModel 框架模型
+     */
     @Override
     public void initializeFrameworkModel(FrameworkModel frameworkModel) {
         ScopeBeanFactory beanFactory = frameworkModel.getBeanFactory();
@@ -44,6 +54,12 @@ public class CommonScopeModelInitializer implements ScopeModelInitializer {
         beanFactory.registerBean(ClassHolder.class);
     }
 
+    /**
+     * 初始化应用模型
+     * 注册应用级别的Bean组件
+     * 
+     * @param applicationModel 应用模型
+     */
     @Override
     public void initializeApplicationModel(ApplicationModel applicationModel) {
         ScopeBeanFactory beanFactory = applicationModel.getBeanFactory();
@@ -52,6 +68,12 @@ public class CommonScopeModelInitializer implements ScopeModelInitializer {
         beanFactory.registerBean(new ConfigurationCache());
     }
 
+    /**
+     * 初始化模块模型
+     * 注册模块级别的Bean组件
+     * 
+     * @param moduleModel 模块模型
+     */
     @Override
     public void initializeModuleModel(ModuleModel moduleModel) {
         ScopeBeanFactory beanFactory = moduleModel.getBeanFactory();

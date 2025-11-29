@@ -22,6 +22,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * 表示不稳定的API，可能在未来的版本中被移除或更改。
  * Indicating unstable API, may get removed or changed in future releases.
  */
 @Retention(RetentionPolicy.CLASS)

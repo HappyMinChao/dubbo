@@ -17,14 +17,16 @@
 package org.apache.dubbo.common;
 
 /**
+ * 可重置接口
  * Resetable.
  */
 public interface Resetable {
 
     /**
+     * 重置方法
      * reset.
      *
-     * @param url
+     * @param url URL地址
      */
     void reset(URL url);
 }

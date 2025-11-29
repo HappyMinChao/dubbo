@@ -20,23 +20,30 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
+ * 包装器注解。当条件匹配时，被注解的类将仅作为包装器工作。
  * The annotated class will only work as a wrapper when the condition matches.
  */
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Wrapper {
 
     /**
+     * 需要被包装的扩展名称。
+     * 当此数组为空时默认匹配。
      * the extension names that need to be wrapped.
      * default is matching when this array is empty.
      */
     String[] matches() default {};
 
     /**
+     * 需要被排除的扩展名称。
      * the extension names that need to be excluded.
      */
     String[] mismatches() default {};
 
     /**
+     * 绝对排序，可选
+     * 升序排列，较小的值将排在列表前面。
+     * @return 排序值
      * absolute ordering, optional
      * ascending order, smaller values will be in the front of the list.
      * @return

@@ -21,25 +21,54 @@ import org.apache.dubbo.common.utils.StringUtils;
 
 import java.util.Objects;
 
+/**
+ * 服务键
+ * 用于唯一标识一个服务，包含接口名、版本号和分组信息
+ */
 public class ServiceKey {
+    /** 接口名称 */
     private final String interfaceName;
+    /** 分组 */
     private final String group;
+    /** 版本号 */
     private final String version;
 
+    /**
+     * 构造函数
+     * 
+     * @param interfaceName 接口名称
+     * @param version 版本号
+     * @param group 分组
+     */
     public ServiceKey(String interfaceName, String version, String group) {
         this.interfaceName = interfaceName;
         this.group = group;
         this.version = version;
     }
 
+    /**
+     * 获取接口名称
+     * 
+     * @return 接口名称
+     */
     public String getInterfaceName() {
         return interfaceName;
     }
 
+    /**
+     * 获取分组
+     * 
+     * @return 分组
+     */
     public String getGroup() {
         return group;
     }
 
+    /**
+     * 获取版本号
+     * 
+     * @return 版本号
+     */
     public String getVersion() {
         return version;
     }
@@ -68,7 +97,17 @@ public class ServiceKey {
         return BaseServiceMetadata.buildServiceKey(interfaceName, group, version);
     }
 
+    /**
+     * 服务键匹配器
+     */
     public static class Matcher {
+        /**
+         * 判断规则服务键是否与目标服务键匹配
+         * 
+         * @param rule 规则服务键
+         * @param target 目标服务键
+         * @return 如果匹配返回true，否则返回false
+         */
         public static boolean isMatch(ServiceKey rule, ServiceKey target) {
             // 1. match interface (accurate match)
             if (!Objects.equals(rule.getInterfaceName(), target.getInterfaceName())) {

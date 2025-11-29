@@ -973,8 +973,8 @@ public final class ReflectUtils {
      */
     public static boolean isInstance(Object obj, String interfaceClazzName) {
         for (Class<?> clazz = obj.getClass();
-                clazz != null && !clazz.equals(Object.class);
-                clazz = clazz.getSuperclass()) {
+             clazz != null && !clazz.equals(Object.class);
+             clazz = clazz.getSuperclass()) {
             Class<?>[] interfaces = clazz.getInterfaces();
             for (Class<?> itf : interfaces) {
                 if (itf.getName().equals(interfaceClazzName)) {
@@ -1095,8 +1095,8 @@ public final class ReflectUtils {
                 && method.getDeclaringClass() != Object.class
                 && method.getParameterTypes().length == 0
                 && ((method.getName().startsWith("get") && method.getName().length() > 3)
-                        || (method.getName().startsWith("is")
-                                && method.getName().length() > 2));
+                || (method.getName().startsWith("is")
+                && method.getName().length() > 2));
     }
 
     public static String getPropertyNameFromBeanReadMethod(Method method) {
@@ -1353,7 +1353,7 @@ public final class ReflectUtils {
     @SuppressWarnings("deprecation") // on JDK 9
     public static void makeAccessible(Method method) {
         if ((!Modifier.isPublic(method.getModifiers())
-                        || !Modifier.isPublic(method.getDeclaringClass().getModifiers()))
+                || !Modifier.isPublic(method.getDeclaringClass().getModifiers()))
                 && !method.isAccessible()) {
             method.setAccessible(true);
         }

@@ -23,6 +23,33 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * 扩展接口标记
+ * <p/>
+ * 扩展配置文件的变更<br/>
+ * 以<code>Protocol</code>为例，其配置文件'META-INF/dubbo/com.xxx.Protocol'从以下格式：<br/>
+ * <pre>
+ *     com.foo.XxxProtocol
+ *     com.foo.YyyProtocol
+ * </pre>
+ * <p>
+ * 变更为键值对形式：<br/>
+ * <pre>
+ *     xxx=com.foo.XxxProtocol
+ *     yyy=com.foo.YyyProtocol
+ * </pre>
+ * <br/>
+ * 这样变更的原因是：
+ * <p>
+ * 如果扩展实现中通过静态字段或方法引用了第三方库，而该第三方库不存在时，其类将无法初始化。
+ * 在这种情况下，如果使用之前的格式，dubbo无法确定扩展的ID，因此无法将异常信息与扩展映射起来。
+ * <p/>
+ * 例如：
+ * <p>
+ * 加载Extension("mina")失败。当用户配置使用mina时，dubbo会报告扩展无法加载，
+ * 而不是报告具体哪个扩展实现失败以及确切的原因。
+ * </p>
+ *
+ * @deprecated 因为太通用，请切换到使用 {@link org.apache.dubbo.common.extension.SPI}
  * Marker for extension interface
  * <p/>
  * Changes on extension configuration file <br/>
