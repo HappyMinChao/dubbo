@@ -111,7 +111,96 @@ import static org.apache.dubbo.metadata.MetadataConstants.METADATA_PUBLISH_DELAY
 import static org.apache.dubbo.remoting.Constants.CLIENT_KEY;
 
 /**
+ * 默认应用部署器
+ * 
+ * Dubbo应用部署器的默认实现，负责应用的完整生命周期管理，包括初始化、启动、停止和销毁。
+ * 该类是Dubbo应用启动的核心类，协调和管理应用级别的所有组件和模块。
+ * 
+ * <p>
+ * <b>主要职责：</b>
+ * <ul>
+ * <li>应用生命周期管理：控制应用的初始化、启动、停止和销毁流程</li>
+ * <li>配置中心管理：初始化和启动配置中心，监听配置变化</li>
+ * <li>元数据中心管理：初始化和启动元数据中心，管理服务元数据</li>
+ * <li>注册中心管理：管理服务注册和注销，维护服务实例</li>
+ * <li>模块部署：协调内部模块和业务模块的部署</li>
+ * <li>环境准备：准备应用运行环境，加载配置属性</li>
+ * <li>指标收集：初始化和管理指标收集器和上报器</li>
+ * <li>链路追踪：初始化链路追踪组件</li>
+ * <li>关闭钩子：注册和管理应用关闭钩子</li>
+ * </ul>
+ * 
+ * <p>
+ * <b>生命周期流程：</b>
+ * <pre>
+ * 1. 初始化阶段 (initialize)
+ *    - 检查应用状态
+ *    - 初始化配置管理器
+ *    - 启动配置中心
+ *    - 加载外部配置和应用配置
+ *    - 启动元数据中心
+ *    - 准备环境配置
+ *    - 初始化指标收集器
+ *    - 初始化链路追踪
+ * 
+ * 2. 启动阶段 (start)
+ *    - 启动内部模块
+ *    - 启动业务模块
+ *    - 导出元数据服务
+ *    - 注册服务实例
+ *    - 提交指标上报器
+ *    - 注册关闭钩子
+ * 
+ * 3. 停止阶段 (stop)
+ *    - 注销服务实例
+ *    - 停止指标收集
+ *    - 停止所有模块
+ *    - 注销关闭钩子
+ * 
+ * 4. 销毁阶段 (destroy)
+ *    - 销毁所有模块
+ *    - 销毁配置中心
+ *    - 销毁元数据中心
+ *    - 销毁注册中心
+ *    - 清理资源缓存
+ * </pre>
+ * 
+ * <p>
+ * <b>状态管理：</b>
+ * 应用部署器维护以下状态：
+ * <ul>
+ * <li>PENDING - 待启动</li>
+ * <li>STARTING - 启动中</li>
+ * <li>STARTED - 已启动</li>
+ * <li>STOPPING - 停止中</li>
+ * <li>STOPPED - 已停止</li>
+ * <li>FAILED - 失败</li>
+ * </ul>
+ * 
+ * <p>
+ * <b>使用场景：</b>
+ * <ul>
+ * <li>应用启动时自动创建并执行启动流程</li>
+ * <li>单元测试中控制应用的启动和停止</li>
+ * <li>应用优雅关闭时执行清理操作</li>
+ * <li>多模块应用的统一部署管理</li>
+ * </ul>
+ * 
+ * <p>
+ * <b>线程安全：</b>
+ * 该类使用多个锁来保证线程安全：
+ * <ul>
+ * <li>stateLock - 状态变更锁</li>
+ * <li>startLock - 启动操作锁</li>
+ * <li>destroyLock - 销毁操作锁</li>
+ * <li>internalModuleLock - 内部模块操作锁</li>
+ * </ul>
+ * 
  * initialize and start application instance
+ * 
+ * @see ApplicationDeployer
+ * @see ApplicationModel
+ * @see ModuleDeployer
  */
 public class DefaultApplicationDeployer extends AbstractDeployer<ApplicationModel> implements ApplicationDeployer {
 
