@@ -51,17 +51,83 @@ import static org.apache.dubbo.common.constants.LoggerCodeConstants.COMMON_UNEXP
 import static org.apache.dubbo.config.AbstractConfig.getTagName;
 
 /**
+ * 模块级配置管理器
+ * 
+ * 管理Dubbo模块级别的所有配置对象，包括模块配置、服务配置、引用配置、提供者配置和消费者配置。
+ * 该类与{@link ConfigManager}相似，但管理的是模块级别的配置，而非应用级别。
+ * 
+ * <p>
+ * <b>作用：</b>
+ * <ul>
+ * <li>统一管理模块级别的配置对象</li>
+ * <li>管理服务导出和引用的配置</li>
+ * <li>维护服务配置缓存，提高查询效率</li>
+ * <li>支持配置的刷新和更新</li>
+ * <li>作为ModuleModel的扩展，集成到模块模型中</li>
+ * </ul>
+ * 
+ * <p>
+ * <b>管理的配置类型：</b>
+ * <ul>
+ * <li>ModuleConfig - 模块配置（唯一）</li>
+ * <li>ServiceConfigBase - 服务配置（多实例）</li>
+ * <li>ReferenceConfigBase - 引用配置（多实例）</li>
+ * <li>ProviderConfig - 提供者配置（多实例）</li>
+ * <li>ConsumerConfig - 消费者配置（多实例）</li>
+ * </ul>
+ * 
+ * <p>
+ * <b>使用场景：</b>
+ * <ul>
+ * <li>模块启动时初始化和管理配置</li>
+ * <li>服务导出和引用时的配置管理</li>
+ * <li>配置刷新时更新模块配置</li>
+ * <li>多模块应用中的配置隔离</li>
+ * </ul>
+ * 
+ * <p>
+ * <b>特殊功能：</b>
+ * <ul>
+ * <li>服务配置缓存：通过serviceConfigCache提高服务查询效率</li>
+ * <li>重复配置检查：特别检查服务和引用配置的唯一性</li>
+ * <li>配置刷新：refreshAll()方法刷新所有模块配置</li>
+ * <li>关联应用配置：自动关联到ApplicationConfigManager</li>
+ * </ul>
+ * 
+ * <p>
+ * <b>与 ConfigManager 的关系：</b>
+ * <ul>
+ * <li>ModuleConfigManager管理模块级配置</li>
+ * <li>ConfigManager管理应用级配置</li>
+ * <li>模块配置管理器可以访问应用配置管理器</li>
+ * <li>支持配置的继承和覆盖</li>
+ * </ul>
+ * 
  * Manage configs of module
+ * 
+ * @see AbstractConfigManager
+ * @see ModuleExt
+ * @see ModuleModel
+ * @see ConfigManager
  */
 public class ModuleConfigManager extends AbstractConfigManager implements ModuleExt {
 
     private static final ErrorTypeAwareLogger logger = LoggerFactory.getErrorTypeAwareLogger(ModuleConfigManager.class);
 
+    /** 模块配置管理器名称 */
     public static final String NAME = "moduleConfig";
 
+    /** 服务配置缓存，用于快速查找服务配置 */
     private final Map<String, AbstractInterfaceConfig> serviceConfigCache = new ConcurrentHashMap<>();
+    /** 应用配置管理器引用 */
     private final ConfigManager applicationConfigManager;
 
+    /**
+     * 构造函数
+     * 创建模块级配置管理器
+     * 
+     * @param moduleModel 模块模型
+     */
     public ModuleConfigManager(ModuleModel moduleModel) {
         super(
                 moduleModel,

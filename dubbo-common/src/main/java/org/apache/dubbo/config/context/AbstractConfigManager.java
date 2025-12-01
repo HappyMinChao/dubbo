@@ -66,30 +66,123 @@ import static org.apache.dubbo.common.constants.LoggerCodeConstants.COMMON_PROPE
 import static org.apache.dubbo.common.constants.LoggerCodeConstants.COMMON_UNEXPECTED_EXCEPTION;
 import static org.apache.dubbo.config.AbstractConfig.getTagName;
 
+/**
+ * 抽象配置管理器
+ * 
+ * Dubbo配置管理器的抽象基类，提供配置对象的通用管理功能。
+ * 该类实现了配置的增删改查、重复检查、默认值处理等核心功能。
+ * 子类包括{@link ConfigManager}（应用级）和{@link ModuleConfigManager}（模块级）。
+ * 
+ * <p>
+ * <b>作用：</b>
+ * <ul>
+ * <li>提供配置对象的通用管理功能</li>
+ * <li>实现配置的增删改查操作</li>
+ * <li>支持多种配置模式（严格、覆盖、忽略等）</li>
+ * <li>管理唯一配置类型和多实例配置类型</li>
+ * <li>支持配置的验证和刷新</li>
+ * <li>提供配置的ID自动生成机制</li>
+ * </ul>
+ * 
+ * <p>
+ * <b>核心数据结构：</b>
+ * <ul>
+ * <li>configsCache - 配置缓存，两层Map结构：配置类型 -> 配置ID -> 配置对象</li>
+ * <li>configIdIndexes - 配置ID索引计数器，用于生成唯一ID</li>
+ * <li>duplicatedConfigs - 重复配置集合</li>
+ * <li>uniqueConfigTypes - 静态集合，存储唯一配置类型</li>
+ * </ul>
+ * 
+ * <p>
+ * <b>配置模式：</b>
+ * <ul>
+ * <li>STRICT - 严格模式，不允许重复配置</li>
+ * <li>OVERRIDE - 覆盖模式，后来的配置覆盖之前的</li>
+ * <li>OVERRIDE_ALL - 全量覆盖模式</li>
+ * <li>OVERRIDE_IF_ABSENT - 条件覆盖模式</li>
+ * <li>IGNORE - 忽略模式，保留第一个配置</li>
+ * </ul>
+ * 
+ * <p>
+ * <b>唯一配置类型：</b>
+ * <ul>
+ * <li>ApplicationConfig - 应用配置</li>
+ * <li>MonitorConfig - 监控配置</li>
+ * <li>MetricsConfig - 指标配置</li>
+ * <li>TracingConfig - 追踪配置</li>
+ * <li>SslConfig - SSL配置</li>
+ * <li>ModuleConfig - 模块配置</li>
+ * </ul>
+ * 
+ * <p>
+ * <b>使用场景：</b>
+ * <ul>
+ * <li>作为{@link ConfigManager}和{@link ModuleConfigManager}的基类</li>
+ * <li>提供配置管理的通用实现</li>
+ * <li>支持自定义配置管理器的扩展</li>
+ * </ul>
+ * 
+ * <p>
+ * <b>生命周期：</b>
+ * <ul>
+ * <li>initialize() - 初始化配置管理器，加载配置模式</li>
+ * <li>refreshAll() - 刷新所有配置</li>
+ * <li>clear() - 清理所有配置</li>
+ * <li>destroy() - 销毁配置管理器</li>
+ * </ul>
+ * 
+ * <p>
+ * <b>线程安全：</b>
+ * <ul>
+ * <li>使用ConcurrentHashMap保证线程安全</li>
+ * <li>写操作通过synchronized同步块加锁</li>
+ * <li>支持并发读取</li>
+ * </ul>
+ * 
+ * @see ConfigManager
+ * @see ModuleConfigManager
+ * @see ConfigMode
+ * @see LifecycleAdapter
+ */
 public abstract class AbstractConfigManager extends LifecycleAdapter {
 
+    /** 配置名称读取方法 */
     private static final String CONFIG_NAME_READ_METHOD = "getName";
 
     private static final ErrorTypeAwareLogger logger =
             LoggerFactory.getErrorTypeAwareLogger(AbstractConfigManager.class);
+    /** 唯一配置类型集合 */
     private static final Set<Class<? extends AbstractConfig>> uniqueConfigTypes = new ConcurrentHashSet<>();
 
+    /** 配置缓存，两层Map结构：配置类型 -> 配置ID -> 配置对象 */
     final ConcurrentHashMap<String, Map<String, AbstractConfig>> configsCache = new ConcurrentHashMap<>();
 
+    /** 配置ID索引计数器 */
     private final ConcurrentHashMap<String, AtomicInteger> configIdIndexes = new ConcurrentHashMap<>();
 
+    /** 重复配置集合 */
     protected Set<AbstractConfig> duplicatedConfigs = new ConcurrentHashSet<>();
 
+    /** 作用域模型 */
     protected final ScopeModel scopeModel;
+    /** 应用模型 */
     protected final ApplicationModel applicationModel;
+    /** 支持的配置类型 */
     private final Collection<Class<? extends AbstractConfig>> supportedConfigTypes;
+    /** 环境配置 */
     private final Environment environment;
+    /** 配置验证器 */
     private ConfigValidator configValidator;
+    /** 初始化标记 */
     private final AtomicBoolean initialized = new AtomicBoolean(false);
+    /** 配置模式 */
     protected ConfigMode configMode = ConfigMode.STRICT;
+    /** 是否忽略重复的接口 */
     protected boolean ignoreDuplicatedInterface = false;
 
     static {
+        // 初始化唯一配置类型
+        // 应用级唯一配置
         // init unique config types
         // unique config in application
         uniqueConfigTypes.add(ApplicationConfig.class);
@@ -98,10 +191,18 @@ public abstract class AbstractConfigManager extends LifecycleAdapter {
         uniqueConfigTypes.add(TracingConfig.class);
         uniqueConfigTypes.add(SslConfig.class);
 
+        // 模块级唯一配置
         // unique config in each module
         uniqueConfigTypes.add(ModuleConfig.class);
     }
 
+    /**
+     * 构造函数
+     * 创建抽象配置管理器
+     * 
+     * @param scopeModel 作用域模型（ApplicationModel或ModuleModel）
+     * @param supportedConfigTypes 支持的配置类型集合
+     */
     public AbstractConfigManager(
             ScopeModel scopeModel, Collection<Class<? extends AbstractConfig>> supportedConfigTypes) {
         this.scopeModel = scopeModel;

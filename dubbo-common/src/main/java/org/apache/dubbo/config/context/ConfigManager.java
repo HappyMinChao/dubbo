@@ -47,17 +47,77 @@ import static java.util.Optional.ofNullable;
 import static org.apache.dubbo.config.AbstractConfig.getTagName;
 
 /**
+ * 应用级配置管理器
+ * 
+ * 管理Dubbo应用级别的所有配置对象，包括应用配置、协议配置、注册中心配置、配置中心配置等。
+ * 该类采用无锁设计（通过ConcurrentHashMap），以实现快速的读操作。
+ * 写操作使用配置类型的子配置映射表进行加锁，以确保安全地检查和添加新配置。
+ * 
+ * <p>
+ * <b>作用：</b>
+ * <ul>
+ * <li>统一管理应用级别的配置对象</li>
+ * <li>提供配置的增删改查功能</li>
+ * <li>支持配置的默认值和多实例管理</li>
+ * <li>维护唯一配置类型的处理逻辑</li>
+ * <li>作为ApplicationModel的扩展，集成到应用模型中</li>
+ * </ul>
+ * 
+ * <p>
+ * <b>管理的配置类型：</b>
+ * <ul>
+ * <li>ApplicationConfig - 应用配置（唯一）</li>
+ * <li>MonitorConfig - 监控中心配置（唯一）</li>
+ * <li>MetricsConfig - 指标配置（唯一）</li>
+ * <li>TracingConfig - 链路追踪配置（唯一）</li>
+ * <li>SslConfig - SSL配置（唯一）</li>
+ * <li>ProtocolConfig - 协议配置（多实例）</li>
+ * <li>RegistryConfig - 注册中心配置（多实例）</li>
+ * <li>ConfigCenterConfig - 配置中心配置（多实例）</li>
+ * <li>MetadataReportConfig - 元数据中心配置（多实例）</li>
+ * </ul>
+ * 
+ * <p>
+ * <b>使用场景：</b>
+ * <ul>
+ * <li>应用启动时初始化和管理配置</li>
+ * <li>配置中心推送配置时更新管理的配置</li>
+ * <li>在运行时动态获取和修改配置</li>
+ * <li>Spring集成时统一管理Bean配置</li>
+ * </ul>
+ * 
+ * <p>
+ * <b>线程安全：</b>
+ * <ul>
+ * <li>读操作无锁，通过ConcurrentHashMap实现快速访问</li>
+ * <li>写操作使用配置类型级别的锁，确保安全性</li>
+ * <li>支持并发访问和修改</li>
+ * </ul>
+ * 
  * A lock-free config manager (through ConcurrentHashMap), for fast read operation.
  * The Write operation lock with sub configs map of config type, for safely check and add new config.
+ * 
+ * @see AbstractConfigManager
+ * @see ApplicationExt
+ * @see ApplicationModel
  */
 public class ConfigManager extends AbstractConfigManager implements ApplicationExt {
 
     private static final Logger logger = LoggerFactory.getLogger(ConfigManager.class);
 
+    /** 配置管理器名称 */
     public static final String NAME = "config";
+    /** Bean名称 */
     public static final String BEAN_NAME = "dubboConfigManager";
+    /** 配置模式属性键 */
     public static final String DUBBO_CONFIG_MODE = ConfigKeys.DUBBO_CONFIG_MODE;
 
+    /**
+     * 构造函数
+     * 创建应用级配置管理器
+     * 
+     * @param applicationModel 应用模型
+     */
     public ConfigManager(ApplicationModel applicationModel) {
         super(
                 applicationModel,
