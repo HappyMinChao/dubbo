@@ -308,18 +308,18 @@ end
 
 ```mermaid
 flowchart TD
-Start([开始激活扩展]) --> CheckGroup{"检查组条件"}
-CheckGroup --> |不匹配| Skip["跳过扩展"]
-CheckGroup --> |匹配| CheckValue{"检查URL参数"}
-CheckValue --> |不满足| Skip
-CheckValue --> |满足| CheckOnClass{"检查类存在"}
-CheckOnClass --> |不满足| Skip
-CheckOnClass --> |满足| Activate["激活扩展"]
-subgraph "条件检查"
-CheckGroup --> |group()| CompareGroup["比较组名"]
-CheckValue --> |value()| ParseURL["解析URL参数"]
-CheckOnClass --> |onClass()| CheckClass["检查类是否存在"]
-end
+    Start([开始激活扩展]) --> CheckGroup{"检查组条件"}
+    CheckGroup --> |不匹配| Skip["跳过扩展"]
+    CheckGroup --> |匹配| CheckValue{"检查URL参数"}
+    CheckValue --> |不满足| Skip
+    CheckValue --> |满足| CheckOnClass{"检查类存在"}
+    CheckOnClass --> |不满足| Skip
+    CheckOnClass --> |满足| Activate["激活扩展"]
+    subgraph "条件检查"
+        CheckGroup --> |"group()"| CompareGroup["比较组名"]
+        CheckValue --> |"value()"| ParseURL["解析URL参数"]
+        CheckOnClass --> |"onClass()"| CheckClass["检查类是否存在"]
+    end
 style CheckGroup fill:#f96,stroke:#333
 style CheckValue fill:#f96,stroke:#333
 style CheckOnClass fill:#f96,stroke:#333
