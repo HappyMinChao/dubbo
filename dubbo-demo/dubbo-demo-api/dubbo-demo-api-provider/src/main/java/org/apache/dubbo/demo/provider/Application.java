@@ -17,6 +17,8 @@
 package org.apache.dubbo.demo.provider;
 
 import org.apache.dubbo.api.demo.DemoService;
+import org.apache.dubbo.api.demo.DemoService2;
+import org.apache.dubbo.api.demo.DemoService3;
 import org.apache.dubbo.common.constants.CommonConstants;
 import org.apache.dubbo.config.ApplicationConfig;
 import org.apache.dubbo.config.ConfigCenterConfig;
@@ -25,6 +27,8 @@ import org.apache.dubbo.config.ProtocolConfig;
 import org.apache.dubbo.config.RegistryConfig;
 import org.apache.dubbo.config.ServiceConfig;
 import org.apache.dubbo.config.bootstrap.DubboBootstrap;
+
+import java.util.Arrays;
 
 public class Application {
 
@@ -39,6 +43,14 @@ public class Application {
         service.setInterface(DemoService.class);
         service.setRef(new DemoServiceImpl());
 
+        ServiceConfig<DemoServiceImpl2> service2 = new ServiceConfig<>();
+        service2.setInterface(DemoService2.class);
+        service2.setRef(new DemoServiceImpl2());
+
+        ServiceConfig<DemoServiceImpl3> service3 = new ServiceConfig<>();
+        service3.setInterface(DemoService3.class);
+        service3.setRef(new DemoServiceImpl3());
+
         ConfigCenterConfig configCenterConfig = new ConfigCenterConfig();
         configCenterConfig.setAddress(ZOOKEEPER_URL);
 
@@ -50,7 +62,7 @@ public class Application {
                 .registry(new RegistryConfig(ZOOKEEPER_URL))
                 .metadataReport(new MetadataReportConfig(ZOOKEEPER_URL))
                 .protocol(new ProtocolConfig(CommonConstants.DUBBO, -1))
-                .service(service)
+                .services(Arrays.asList(service, service2, service3))
                 .start()
                 .await();
     }
